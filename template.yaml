@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "HaveIBeenPwned Security Hub Finding Notifier"
+Transform: "AWS::Serverless-2016-10-31"
+Resources:
+    pwnedLambda:
+        Type: "AWS::Serverless::Function"
+        Properties:
+            Handler: "index.handler"
+            CodeUri: "./src"
+            Runtime: "python3.7"
+            MemorySize: 128
+            Timeout: 900
+            Policies:
+              - Version: "2012-10-17"
+                Statement:
+                  - Effect: "Allow"
+                    Action:
+                      - "securityhub:BatchImportFindings"
+                    Resource: "*"
+            Environment:
+                Variables:
+                    REGION: !Ref "AWS::Region"
+                    ACCOUNTID: !Ref "AWS::AccountId"
+            Events:
+                Rule:
+                    Type: "Schedule"
+                    Properties:
+                        Schedule: "rate(24 hours)"
